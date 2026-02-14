@@ -1,169 +1,346 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
+<html lang="id"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portofolio Figo — Voli & Gambar</title>
+    <title>Figo · Voli Damage + Paint Random</title>
     <style>
+        /* ---------- GLOBAL YELLOW-WHITE ---------- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            background-color: #fffef7;  /* putih hangat */
-            background-image: linear-gradient(145deg, #fff9e6 0%, #fffef7 100%);
+            background: #fffef5;
             color: #2d2a24;
             line-height: 1.5;
+            overflow-x: hidden;
         }
 
-        /* aksen kuning cerah */
-        header {
-            background: #ffc107;  /* kuning madu */
-            color: #1e1b16;
-            padding: 40px 20px 30px;
+        /* ---------- LOADING SCREEN UTAMA ---------- */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #ffd966, #ffb300);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.7s, visibility 0.7s;
+        }
+
+        .loader-box {
+            background: #fffae6;
+            padding: 40px 30px;
+            border-radius: 64px 16px 64px 16px;
+            box-shadow: 0 20px 40px rgba(255, 140, 0, 0.4);
             text-align: center;
-            border-bottom: 5px solid #ffb300;
-            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+            border: 6px solid white;
+            max-width: 480px;
+            width: 90%;
+            animation: popIn 0.6s;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .game-progress {
+            width: 80%;
+            height: 20px;
+            background: #ffecb3;
+            margin: 25px auto 15px;
+            border-radius: 30px;
+            overflow: hidden;
+            border: 2px solid #ff8f00;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #ff6f00;
+            transition: width 2s ease;
+            border-radius: 30px;
+        }
+
+        /* ---------- HEADER & NAV ---------- */
+        header {
+            background: #ffc107;
+            color: #1e1b16;
+            padding: 36px 20px 28px;
+            text-align: center;
+            border-bottom: 6px solid #ffb300;
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
         }
 
         header h1 {
-            font-size: 44px;
+            font-size: 48px;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            text-shadow: 2px 2px 0 rgba(255, 224, 130, 0.6);
+            text-shadow: 3px 3px 0 rgba(255, 224, 130, 0.6);
+            animation: slideInDown 0.6s;
+        }
+
+        @keyframes slideInDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         header p {
             font-size: 20px;
             margin-top: 12px;
-            color: #2c2800;
-            font-weight: 500;
-            background: rgba(255,255,240,0.5);
+            background: rgba(44, 40, 0, 0.06);
             display: inline-block;
-            padding: 6px 24px;
+            padding: 8px 30px;
             border-radius: 50px;
-            backdrop-filter: blur(2px);
+            font-weight: 600;
         }
 
-        nav {
-            background: #ffb300;  /* kuning lebih pekat */
+        .page-nav {
+            background: #ffb300;
             padding: 16px 10px;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            border-bottom: 3px solid #ff8f00;
             position: sticky;
             top: 0;
-            z-index: 10;
-            border-bottom: 2px solid #ff8f00;
+            z-index: 100;
         }
 
-        nav a {
-            color: #1f2a36;
-            margin: 0 20px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 17px;
-            transition: 0.2s;
-            padding: 6px 0;
-            border-bottom: 3px solid transparent;
+        .nav-btn {
+            background: rgba(255, 255, 240, 0.5);
+            border: none;
+            padding: 10px 32px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            color: #2d2818;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 2px solid transparent;
         }
 
-        nav a:hover {
-            border-bottom-color: #2c3e50;
-            color: #0a1c2a;
+        .nav-btn:hover {
+            background: #ffea9f;
+            border-color: #ff8f00;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(255, 140, 0, 0.3);
         }
 
-        section {
-            padding: 40px 24px;
-            max-width: 960px;
-            margin: 0 auto;
+        .nav-btn:active { transform: scale(0.95); }
+        .nav-btn.active {
+            background: #ff8f00;
+            color: white;
+            border-color: white;
+        }
+
+        /* ---------- PAGES ---------- */
+        .page {
+            display: none;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 24px;
+            animation: fadePage 0.5s;
+        }
+        .page.active-page { display: block; }
+        @keyframes fadePage {
+            from { opacity: 0.3; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 36px 16px 36px 16px;
+            padding: 32px 36px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 25px rgba(255, 193, 7, 0.1);
+            border: 1px solid #ffeaa5;
         }
 
         h2 {
             font-size: 32px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             color: #3e2e1f;
             border-left: 8px solid #ffc107;
             padding-left: 20px;
-            font-weight: 650;
         }
 
-        .content-block {
-            background: white;
-            padding: 28px 32px;
-            border-radius: 32px 12px 32px 12px;
-            box-shadow: 0 10px 25px rgba(255, 193, 7, 0.15);
-            border: 1px solid #ffe69b;
-            transition: 0.2s;
+        /* ---------- GAME CONTAINERS ---------- */
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
         }
 
-        .content-block:hover {
-            box-shadow: 0 15px 30px rgba(255, 160, 0, 0.2);
+        canvas {
+            background: #e9f0e5;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 4px solid #ffc107;
+            width: 100%;
+            height: auto;
         }
 
-        /* mempermanis list */
-        ul {
-            list-style: none;
-            margin-left: 0;
-        }
-
-        li {
-            margin-bottom: 12px;
-            padding-left: 32px;
+        .game-wrapper {
             position: relative;
-            font-size: 17px;
+            display: inline-block;
         }
 
-        li::before {
-            content: "✏️";  /* pensil kecil — cocok untuk hobi menggambar */
+        .fullscreen-btn {
             position: absolute;
-            left: 0;
-            top: 0;
-            font-size: 18px;
-        }
-
-        /* khusus untuk keahlian, kita ganti ikon */
-        #keahlian li::before {
-            content: "🏐";  /* bola voli buat semangat atlet */
-        }
-
-        .project-item {
-            margin-bottom: 30px;
-            border-bottom: 1px dashed #ffd966;
-            padding-bottom: 20px;
-        }
-
-        .project-item:last-child {
-            border-bottom: none;
-        }
-
-        .project-item h3 {
-            font-size: 22px;
-            margin-bottom: 8px;
-            color: #2c3e4e;
-            font-weight: 600;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .fullscreen-btn:hover {
+            background: black;
+            transform: scale(1.1);
         }
 
-        .project-item p {
-            color: #3e4a4f;
-            margin-left: 6px;
-            font-size: 16px;
+        .control-panel {
+            background: #fffbe6;
+            padding: 20px;
+            border-radius: 24px;
+            border: 2px solid #ffd966;
+            flex: 1 1 280px;
         }
 
-        #kontak p {
-            background: #fff2ce;
-            padding: 14px 22px;
-            border-radius: 60px;
-            display: inline-block;
-            margin-right: 12px;
-            margin-bottom: 12px;
+        .btn-game {
+            background: #ffc107;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 15px;
+            margin: 6px 4px;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 2px solid transparent;
+        }
+        .btn-game:hover {
+            background: #ffb300;
+            border-color: white;
+            transform: scale(1.02);
+        }
+        .btn-game:active { transform: scale(0.98); }
+
+        /* toolbar paint */
+        .paint-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .paint-toolbar label {
             font-weight: 600;
-            color: #2e3b45;
-            border: 1px solid #ffc107;
+            color: #5f4b34;
+        }
+        input[type=range] {
+            width: 100px;
+        }
+        input[type=color] {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* loading screen per game */
+        .game-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #ffe082, #ffb300);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 4px solid white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            animation: fadeIn 0.8s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .character-canvas {
+            background: rgba(255,255,255,0.3);
+            border-radius: 30px;
+            margin-bottom: 20px;
+        }
+
+        .btn-start {
+            background: #ff5722;
+            color: white;
+            font-size: 24px;
+            padding: 16px 48px;
+            border-radius: 60px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #b33e1c;
+            transition: 0.07s;
+            margin-top: 20px;
+        }
+        .btn-start:active {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0 #b33e1c;
+        }
+
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            background: #fff9e0;
+            padding: 20px;
+            border-radius: 24px;
+        }
+        .gallery-item {
+            background: white;
+            border-radius: 16px;
+            padding: 10px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+            border: 2px solid #ffe082;
+            text-align: center;
+        }
+        .gallery-item img {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .theme-badge {
+            background: #ffb74d;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
         }
 
         footer {
@@ -171,118 +348,600 @@
             padding: 28px 20px;
             background: #ffb300;
             color: #2d2818;
-            margin-top: 30px;
-            font-size: 16px;
-            font-weight: 500;
+            margin-top: 40px;
+            font-weight: 600;
             border-top: 6px solid #ffa000;
-        }
-
-        /* garis pemisah jadi dekoratif */
-        hr {
-            border: none;
-            height: 3px;
-            background: #ffe082;
-            width: 120px;
-            margin: 20px auto;
-            border-radius: 10px;
-        }
-
-        /* tambahan sentuhan voli & gambar */
-        .voli-icon {
-            display: inline-block;
-            margin-left: 8px;
-        }
-
-        @media (max-width: 600px) {
-            header h1 { font-size: 34px; }
-            nav a { margin: 0 8px; }
-            section { padding: 30px 16px; }
-            .content-block { padding: 20px 18px; }
         }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Figo</h1>
-    <p>⚡ Pelajar | Penggambar | Calon Atlet Voli ⚡</p>
-</header>
-
-<nav>
-    <a href="#tentang">Tentang</a>
-    <a href="#keahlian">Keahlian</a>
-    <a href="#proyek">Proyek</a>
-    <a href="#kontak">Kontak</a>
-</nav>
-
-<section id="tentang">
-    <h2>Tentang Saya</h2>
-    <div class="content-block">
-        <p style="font-size: 18px; margin-bottom: 16px;">
-            <strong>Figo</strong> — pelajar asal Subang yang punya dua semangat besar: 
-            <span style="background: #ffecb3; padding: 4px 12px; border-radius: 30px;">🏐 voli</span> dan 
-            <span style="background: #ffecb3; padding: 4px 12px; border-radius: 30px;">✏️ menggambar</span>.
-        </p>
-        <p style="font-size: 17px; margin-top: 12px;">
-            Sejak kecil saya suka mencorat-coret sketsa pemain voli dan bercita-cita 
-            <strong>menjadi atlet voli di ASBOCH Subang</strong>. Sekarang saya aktif latihan 
-            sambil terus belajar teknologi dan desain. Saya percaya kerja keras dan kreativitas 
-            bisa membawa mimpi setinggi net voli! 🏐✨
-        </p>
-    </div>
-</section>
-
-<hr>
-
-<section id="keahlian">
-    <h2>Keahlian</h2>
-    <div class="content-block">
-        <ul>
-            <li>HTML, CSS, dan dasar JavaScript</li>
-            <li>Desain grafis & ilustrasi (sketsa manual, Canva)</li>
-            <li>Teknik dasar voli (passing, servis, smash)</li>
-            <li>Computational Thinking & kerja tim</li>
-        </ul>
-        <p style="margin-top: 20px; font-style: italic; color: #5f4b34;">
-            💪 "Latihan gambar dan latihan voli sama-sama butuh fokus."
-        </p>
-    </div>
-</section>
-
-<hr>
-
-<section id="proyek">
-    <h2>Proyek & Karya</h2>
-    <div class="content-block">
-        <div class="project-item">
-            <h3>📘 Website Tugas Voli</h3>
-            <p>Membuat website sederhana berisi teknik dasar voli dan jadwal latihan ASBOCH, untuk tugas sekolah.</p>
+<!-- ========== LOADING SCREEN UTAMA ========== -->
+<div id="loading-screen" style="opacity: 0; visibility: hidden;">
+    <div class="loader-box">
+        <h2>🏐 FIGO'S GAME</h2>
+        <div style="font-size: 48px;">🏐🎨</div>
+        <p>LOADING PORTOFOLIO INTERAKTIF...</p>
+        <div class="game-progress">
+            <div id="progress-fill" class="progress-fill" style="width: 100%;"></div>
         </div>
-        <div class="project-item">
-            <h3>🎨 Poster “Kejurnas Voli Subang”</h3>
-            <p>Desain poster digital untuk turnamen antar klub, dipajang di aula ASBOCH.</p>
-        </div>
-        <div class="project-item">
-            <h3>🏐 Sketsa Atlet Voli</h3>
-            <p>Kumpulan ilustrasi pemain voli dengan gaya manga, diunggah di akun pribadi.</p>
+        <p id="loading-text" style="margin-top: 20px;">✅ READY!</p>
+    </div>
+</div>
+
+<!-- ========== MAIN CONTENT ========== -->
+<div id="main-content" style="display: block; opacity: 1;">
+    <header>
+        <h1>Figo</h1>
+        <p>🏐 Atlet ASBOCH · ✏️ Hobi Menggambar · 🎮 Game Creator</p>
+    </header>
+
+    <!-- NAVIGASI 2 HALAMAN -->
+    <div class="page-nav">
+        <button id="btn-tentang" class="nav-btn active">🏠 Tentang Saya</button>
+        <button id="btn-gamehub" class="nav-btn">🎮 Game Hub</button>
+    </div>
+
+    <!-- HALAMAN TENTANG SAYA -->
+    <div id="tentang-page" class="page active-page">
+        <div class="card">
+            <h2>🏐 Tentang Saya</h2>
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #5f4b34; border-bottom: 2px dashed #ffd966; padding-bottom: 8px;">⚡ Figo · Subang</h3>
+                <p style="font-size: 18px; margin: 20px 0;">
+                    Halo! Aku <strong>Figo</strong>, pelajar asal Subang yang bermimpi jadi atlet voli di <strong>ASBOCH Subang</strong>. 
+                    Di sela latihan, aku suka menggambar dan ngoding game. Dua game di bawah ini karya orisinalku dengan sistem damage dan tema random!
+                </p>
+            </div>
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #5f4b34; border-bottom: 2px dashed #ffd966; padding-bottom: 8px;">🏐 Keahlian</h3>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 10px; padding-left: 30px;">🏐 Voli (passing, servis, smash) – latihan ASBOCH</li>
+                    <li style="margin-bottom: 10px; padding-left: 30px;">💻 HTML, CSS, JavaScript, Canvas</li>
+                    <li style="margin-bottom: 10px; padding-left: 30px;">🎨 Desain grafis &amp; drawing (penghapus, ketebalan, warna!)</li>
+                </ul>
+            </div>
+            <div>
+                <h3 style="color: #5f4b34; border-bottom: 2px dashed #ffd966; padding-bottom: 8px;">📬 Kontak</h3>
+                <div style="background: #fff2ce; padding: 14px 24px; border-radius: 60px; margin: 8px 0;">📷 IG: @user49508</div>
+                <div style="background: #fff2ce; padding: 14px 24px; border-radius: 60px; margin: 8px 0;">📧 Email: figo.satya7@smp.belajar.id</div>
+                <div style="background: #fff2ce; padding: 14px 24px; border-radius: 60px; margin: 8px 0;">🎵 TikTok: @fa3g0</div>
+                <div style="background: #fff2ce; padding: 14px 24px; border-radius: 60px; margin: 8px 0;">📞 WA: +62 877-2084-4141</div>
+            </div>
         </div>
     </div>
-</section>
 
-<hr>
+    <!-- HALAMAN GAME HUB -->
+    <div id="gamehub-page" class="page">
+        <!-- SUB-NAVIGASI 2 GAME -->
+        <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap;">
+            <button id="btn-voli" class="btn-game" style="background: #ffb300;">🏐 Beach Volley + Damage</button>
+            <button id="btn-paint" class="btn-game" style="background: #ffb300;">🎨 Paint Pro + Tema Random</button>
+        </div>
 
-<section id="kontak">
-    <h2>Kontak</h2>
-    <div style="margin-top: 10px;">
-        <p>📧 figo.voli@email.com</p>
-        <p>📷 @figo.sketsa</p>
-        <p>🏐 ASBOCH Subang — latihan Sabtu pagi</p>
+        <!-- ========== GAME VOLLEY ========== -->
+        <div id="game-voli" class="game-container" style="display: none;">
+            <div class="card">
+                <h2>🏐 BEACH VOLLEYBALL CHALLENGE · DAMAGE</h2>
+                <!-- LOADING SCREEN VOLLEY (karakter keren) -->
+                <div id="volley-loading" class="game-loading">
+                    <canvas id="volley-char-canvas" class="character-canvas" width="500" height="250"></canvas>
+                    <h2 style="color: white; text-shadow: 3px 3px 0 #b26500; border-left: none; text-align: center;">BEACH VOLLEYBALL CHALLENGE!</h2>
+                    <p style="font-size: 22px; color: white; font-weight: bold; margin-bottom: 10px;">OVERWHELM YOUR OPPONENTS!</p>
+                    <button id="start-volley" class="btn-start">🏐 MULAI GAME</button>
+                </div>
+                <!-- AREA GAME (awalnya hidden) -->
+                <div id="volley-game-area" style="display: none;">
+                    <div class="game-area">
+                        <div class="game-wrapper">
+                            <canvas id="volleyCanvas" width="600" height="350"></canvas>
+                            <button class="fullscreen-btn" id="fullscreen-volley">⛶</button>
+                        </div>
+                        <div class="control-panel">
+                            <h3>🏐 Kontrol Voli</h3>
+                            <p>⬆️⬇️ (W/S) : gerak pemain</p>
+                            <p>🧤 <strong>CATCH</strong> : tangkap bola (perbesar paddle)</p>
+                            <p>💥 <strong>SMASH</strong> : pukul keras, beri DAMAGE!</p>
+                            <p>❤️ Kesehatan Lawan: <span id="opponentHealth">100%</span></p>
+                            <p>📊 Skor: <span id="volleyScore">0 - 0</span></p>
+                            <button id="catchBtn" class="btn-game" style="background: #ff9800;">🧤 CATCH</button>
+                            <button id="smashBtn" class="btn-game" style="background: #f44336; color: white;">💥 SMASH</button>
+                            <button id="resetVolley" class="btn-game">🔄 Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== GAME PAINT ========== -->
+        <div id="game-paint" class="game-container" style="display: none;">
+            <div class="card">
+                <h2>🎨 PAINT PRO · 5 MENIT · TEMA RANDOM</h2>
+                <div id="paint-loading" class="game-loading">
+                    <canvas id="paint-char-canvas" class="character-canvas" width="500" height="250"></canvas>
+                    <h2 style="color: white; text-shadow: 3px 3px 0 #b26500;">🎨 DRAWING CHALLENGE</h2>
+                    <p style="font-size: 22px; color: white;">Tema akan dipilih secara RANDOM!</p>
+                    <button id="start-paint" class="btn-start">🎨 MULAI MENGGAMBAR</button>
+                </div>
+                <div id="paint-game-area" style="display: none;">
+                    <div class="game-area">
+                        <div class="game-wrapper">
+                            <canvas id="paintCanvas" width="450" height="300"></canvas>
+                            <button class="fullscreen-btn" id="fullscreen-paint">⛶</button>
+                        </div>
+                        <div class="control-panel">
+                            <h3>🖌️ Tools</h3>
+                            <div class="paint-toolbar">
+                                <div>
+                                    <label>Alat:</label>
+                                    <button id="brushBtn" class="btn-game" style="background:#4caf50; color:white;">🖌️ Kuas</button>
+                                    <button id="eraserBtn" class="btn-game">🧽 Penghapus</button>
+                                </div>
+                                <div>
+                                    <label>Ukuran:</label>
+                                    <input type="range" id="brushSize" min="1" max="30" value="5">
+                                    <span id="sizeDisplay">5</span>
+                                </div>
+                                <div>
+                                    <label>Warna:</label>
+                                    <input type="color" id="colorPicker" value="#2d2a24">
+                                </div>
+                            </div>
+                            <!-- Tema random, bukan pilihan user -->
+                            <div style="margin: 15px 0;">
+                                <span class="theme-badge" id="currentThemeBadge">🎲 Tema: People</span>
+                            </div>
+                            <p>⏳ Timer: <span id="paintTimer">05:00</span></p>
+                            <button id="savePaintBtn" class="btn-game">💾 Simpan ke Galeri</button>
+                            <button id="clearPaintBtn" class="btn-game">🗑️ Hapus Canvas</button>
+                        </div>
+                    </div>
+                    <div style="margin-top: 30px;">
+                        <h3>🖼️ GALERI KARYA</h3>
+                        <div id="galleryContainer" class="gallery"></div>
+                        <button id="clearGalleryBtn" class="btn-game">🗑️ Hapus Semua</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</section>
+    <footer>
+        <p>© 2026 Figo · Subang · 2 Game Orisinal 🏐🎨</p>
+    </footer>
+</div>
 
-<footer>
-    <p>© 2026 Figo — dari Subang, untuk mimpi voli dan gambar ✏️🏐</p>
-</footer>
+<script>
+    // ---------- LOADING SCREEN UTAMA ----------
+    window.addEventListener('load', function () {
+        let progress = document.getElementById('progress-fill');
+        let loadingText = document.getElementById('loading-text');
+        let width = 0;
+        let interval = setInterval(function () {
+            if (width >= 100) {
+                clearInterval(interval);
+                loadingText.innerHTML = '✅ READY!';
+                setTimeout(() => {
+                    document.getElementById('loading-screen').style.opacity = '0';
+                    document.getElementById('loading-screen').style.visibility = 'hidden';
+                    document.getElementById('main-content').style.display = 'block';
+                    setTimeout(() => document.getElementById('main-content').style.opacity = '1', 50);
+                    // gambar karakter loading screen
+                    drawVolleyCharacters();
+                    drawPaintCharacters();
+                }, 400);
+            } else {
+                width += Math.floor(Math.random() * 12) + 8;
+                if (width > 100) width = 100;
+                progress.style.width = width + '%';
+                if (width < 50) loadingText.innerHTML = '🏐 Beach Volley Damage...';
+                else loadingText.innerHTML = '🎨 Paint Pro + Tema Random...';
+            }
+        }, 120);
+    });
 
-</body>
-</html>
+    // ---------- NAVIGASI HALAMAN ----------
+    const btnTentang = document.getElementById('btn-tentang');
+    const btnGameHub = document.getElementById('btn-gamehub');
+    const pageTentang = document.getElementById('tentang-page');
+    const pageGameHub = document.getElementById('gamehub-page');
+
+    function setPageActive(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        if (pageId === 'tentang') {
+            pageTentang.classList.add('active-page');
+            btnTentang.classList.add('active');
+            document.querySelectorAll('.game-container').forEach(g => g.style.display = 'none');
+        } else {
+            pageGameHub.classList.add('active-page');
+            btnGameHub.classList.add('active');
+            // default buka voli
+            document.getElementById('game-voli').style.display = 'block';
+            document.getElementById('game-paint').style.display = 'none';
+        }
+    }
+    btnTentang.addEventListener('click', () => setPageActive('tentang'));
+    btnGameHub.addEventListener('click', () => setPageActive('gamehub'));
+
+    // SUB NAVIGASI 2 GAME
+    document.getElementById('btn-voli').addEventListener('click', function () {
+        document.querySelectorAll('.game-container').forEach(g => g.style.display = 'none');
+        document.getElementById('game-voli').style.display = 'block';
+    });
+    document.getElementById('btn-paint').addEventListener('click', function () {
+        document.querySelectorAll('.game-container').forEach(g => g.style.display = 'none');
+        document.getElementById('game-paint').style.display = 'block';
+    });
+
+    // ========== 1. VOLLEY : KARAKTER KEREN ==========
+    function drawVolleyCharacters() {
+        const canvas = document.getElementById('volley-char-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        ctx.fillStyle = '#ffdd99';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#ffc085';
+        ctx.fillRect(0, h-40, w, 40);
+        ctx.fillStyle = '#6ab0e6';
+        ctx.fillRect(0, h-80, w, 40);
+        ctx.beginPath();
+        ctx.setLineDash([5, 10]);
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 3;
+        ctx.moveTo(w/2, 20);
+        ctx.lineTo(w/2, h-40);
+        ctx.stroke();
+        // pemain kiri
+        ctx.fillStyle = '#ffb74d';
+        ctx.beginPath();
+        ctx.arc(120, 140, 25, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = '#f57c00';
+        ctx.fillRect(110, 160, 20, 50);
+        ctx.fillStyle = '#ffe0b2';
+        ctx.beginPath();
+        ctx.arc(120, 140, 20, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(130, 170);
+        ctx.lineTo(170, 130);
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = '#ffe0b2';
+        ctx.stroke();
+        // pemain kanan
+        ctx.fillStyle = '#e57373';
+        ctx.beginPath();
+        ctx.arc(w-120, 140, 25, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = '#d32f2f';
+        ctx.fillRect(w-130, 160, 20, 50);
+        ctx.fillStyle = '#ffcdd2';
+        ctx.beginPath();
+        ctx.arc(w-120, 140, 20, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(w/2, 100, 12, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ffd54f';
+        ctx.fill();
+        ctx.strokeStyle = '#ff8f00';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    // ========== 2. PAINT : KARAKTER KEREN ==========
+    function drawPaintCharacters() {
+        const canvas = document.getElementById('paint-char-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffe0b2';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 'bold 30px sans-serif';
+        ctx.fillStyle = '#bf360c';
+        ctx.fillText('🎨', 50, 120);
+        ctx.fillText('🧽', 150, 180);
+        ctx.fillText('🖌️', 300, 100);
+        ctx.font = '20px sans-serif';
+        ctx.fillStyle = '#4e342e';
+        ctx.fillText('TEMA RANDOM!', 130, 200);
+    }
+
+    // ========== START GAME VOLLEY ==========
+    document.getElementById('start-volley').addEventListener('click', function() {
+        document.getElementById('volley-loading').style.display = 'none';
+        document.getElementById('volley-game-area').style.display = 'block';
+        initVolley();
+    });
+
+    // ========== START GAME PAINT ==========
+    document.getElementById('start-paint').addEventListener('click', function() {
+        document.getElementById('paint-loading').style.display = 'none';
+        document.getElementById('paint-game-area').style.display = 'block';
+        initPaint();
+    });
+
+    // ========== FULLSCREEN ==========
+    function toggleFullscreen(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (canvas.requestFullscreen) canvas.requestFullscreen();
+        else if (canvas.webkitRequestFullscreen) canvas.webkitRequestFullscreen();
+        else if (canvas.msRequestFullscreen) canvas.msRequestFullscreen();
+    }
+    document.getElementById('fullscreen-volley').addEventListener('click', () => toggleFullscreen('volleyCanvas'));
+    document.getElementById('fullscreen-paint').addEventListener('click', () => toggleFullscreen('paintCanvas'));
+
+    // ========== GAME VOLLEY IMPLEMENTASI DENGAN DAMAGE ==========
+    let volleyCtx, volleyCanvas, volleyInitialized = false;
+    let playerY = 150, botY = 150;
+    let ballX = 300, ballY = 175, ballVX = 3, ballVY = 2;
+    let playerScore = 0, botScore = 0;
+    let volleyGameLoop;
+    const PADDLE_WIDTH = 10;
+    let botPaddleHeight = 60;
+    const PLAYER_PADDLE_HEIGHT = 60;
+    const MIN_BOT_HEIGHT = 20;
+    const MAX_BOT_HEIGHT = 60;
+
+    function initVolley() {
+        if (!volleyInitialized) {
+            volleyCanvas = document.getElementById('volleyCanvas');
+            volleyCtx = volleyCanvas.getContext('2d');
+            volleyInitialized = true;
+        }
+        resetVolleyGame();
+        if (volleyGameLoop) clearInterval(volleyGameLoop);
+        volleyGameLoop = setInterval(updateVolley, 30);
+    }
+
+    function resetVolleyGame() {
+        playerY = 150; botY = 150;
+        ballX = 300; ballY = 175; ballVX = 3; ballVY = 2;
+        playerScore = 0; botScore = 0;
+        botPaddleHeight = 60;
+        document.getElementById('volleyScore').innerText = '0 - 0';
+        updateHealthDisplay();
+    }
+
+    function updateHealthDisplay() {
+        let healthPercent = ((botPaddleHeight - MIN_BOT_HEIGHT) / (MAX_BOT_HEIGHT - MIN_BOT_HEIGHT)) * 100;
+        healthPercent = Math.max(0, Math.min(100, healthPercent));
+        document.getElementById('opponentHealth').innerHTML = `${Math.round(healthPercent)}% (${botPaddleHeight}px)`;
+    }
+
+    function updateVolley() {
+        if (!volleyCanvas) return;
+        if (ballY > botY + botPaddleHeight/2) botY += 2;
+        else if (ballY < botY + botPaddleHeight/2) botY -= 2;
+        botY = Math.max(0, Math.min(volleyCanvas.height - botPaddleHeight, botY));
+
+        ballX += ballVX; ballY += ballVY;
+        if (ballY <= 5 || ballY >= volleyCanvas.height - 5) ballVY *= -1;
+
+        if (ballX <= PADDLE_WIDTH + 5 && ballY > playerY && ballY < playerY + PLAYER_PADDLE_HEIGHT) {
+            ballVX = Math.abs(ballVX) * 1.05;
+            ballVX *= -1;
+        }
+        if (ballX >= volleyCanvas.width - PADDLE_WIDTH - 5 && ballY > botY && ballY < botY + botPaddleHeight) {
+            ballVX = -Math.abs(ballVX) * 1.05;
+        }
+
+        if (ballX < 0) { 
+            botScore++; 
+            resetBall(); 
+        }
+        if (ballX > volleyCanvas.width) { 
+            playerScore++; 
+            botPaddleHeight = Math.max(MIN_BOT_HEIGHT, botPaddleHeight - 4);
+            resetBall(); 
+        }
+
+        document.getElementById('volleyScore').innerText = `${playerScore} - ${botScore}`;
+        updateHealthDisplay();
+        drawVolley();
+    }
+
+    function resetBall() {
+        ballX = volleyCanvas.width / 2;
+        ballY = volleyCanvas.height / 2;
+        ballVX = (Math.random() > 0.5 ? 3 : -3);
+        ballVY = (Math.random() * 4 - 2);
+    }
+
+    function drawVolley() {
+        volleyCtx.fillStyle = '#d4e6b5';
+        volleyCtx.fillRect(0, 0, volleyCanvas.width, volleyCanvas.height);
+        volleyCtx.beginPath();
+        volleyCtx.setLineDash([5, 10]);
+        volleyCtx.strokeStyle = 'white';
+        volleyCtx.lineWidth = 3;
+        volleyCtx.moveTo(volleyCanvas.width/2, 0);
+        volleyCtx.lineTo(volleyCanvas.width/2, volleyCanvas.height);
+        volleyCtx.stroke();
+        volleyCtx.fillStyle = '#1b5e20';
+        volleyCtx.fillRect(5, playerY, PADDLE_WIDTH, PLAYER_PADDLE_HEIGHT);
+        volleyCtx.fillStyle = '#b71c1c';
+        volleyCtx.fillRect(volleyCanvas.width - 15, botY, PADDLE_WIDTH, botPaddleHeight);
+        volleyCtx.beginPath();
+        volleyCtx.arc(ballX, ballY, 8, 0, 2 * Math.PI);
+        volleyCtx.fillStyle = '#ff8f00';
+        volleyCtx.fill();
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (!volleyInitialized || document.getElementById('game-voli').style.display !== 'block' || document.getElementById('volley-game-area').style.display !== 'block') return;
+        if (e.key === 'ArrowUp' || e.key === 'w') playerY = Math.max(0, playerY - 25);
+        if (e.key === 'ArrowDown' || e.key === 's') playerY = Math.min(volleyCanvas.height - PLAYER_PADDLE_HEIGHT, playerY + 25);
+    });
+
+    let catchTimer;
+    document.getElementById('catchBtn').addEventListener('click', function() {
+        if (!volleyInitialized) return;
+        window.playerPaddleHeightTemp = 90;
+        setTimeout(() => { window.playerPaddleHeightTemp = 60; }, 300);
+    });
+
+    document.getElementById('smashBtn').addEventListener('click', function() {
+        if (!volleyInitialized) return;
+        ballVX *= 1.8;
+        ballVY *= 1.5;
+    });
+
+    document.getElementById('resetVolley').addEventListener('click', resetVolleyGame);
+
+    // ========== GAME PAINT DENGAN TEMA RANDOM ==========
+    let paintCanvas, paintCtx, painting = false, paintTimerInterval;
+    let timerSeconds = 300;
+    let paintActive = false;
+    let gallery = JSON.parse(localStorage.getItem('figoGallery')) || [];
+
+    // tool state
+    let currentTool = 'brush';
+    let brushSize = 5;
+    let brushColor = '#2d2a24';
+
+    // tema random
+    const themes = ['people', 'plant', 'animal', 'view'];
+    const themeNames = {
+        people: '🧑 People',
+        plant: '🌿 Plant',
+        animal: '🐘 Animal',
+        view: '🏞️ View'
+    };
+    let currentTheme = 'people';
+
+    function getRandomTheme() {
+        return themes[Math.floor(Math.random() * themes.length)];
+    }
+
+    function initPaint() {
+        paintCanvas = document.getElementById('paintCanvas');
+        paintCtx = paintCanvas.getContext('2d');
+        paintCtx.fillStyle = 'white';
+        paintCtx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+        attachPaintEvents();
+        displayGallery();
+
+        // Set tema random
+        currentTheme = getRandomTheme();
+        document.getElementById('currentThemeBadge').innerHTML = `🎲 Tema: ${themeNames[currentTheme]}`;
+
+        paintActive = true;
+        timerSeconds = 300;
+        updateTimerDisplay();
+        if (paintTimerInterval) clearInterval(paintTimerInterval);
+        paintTimerInterval = setInterval(() => {
+            if (!paintActive) return;
+            if (timerSeconds <= 0) {
+                clearInterval(paintTimerInterval);
+                paintActive = false;
+                saveDrawingToGallery();
+                alert('⏰ Waktu habis! Gambar disimpan ke galeri.');
+            } else {
+                timerSeconds--;
+                updateTimerDisplay();
+            }
+        }, 1000);
+    }
+
+    function attachPaintEvents() {
+        paintCanvas.onmousedown = (e) => { painting = true; draw(e); };
+        paintCanvas.onmouseup = () => { painting = false; paintCtx.beginPath(); };
+        paintCanvas.onmousemove = draw;
+        paintCanvas.onmouseleave = () => { painting = false; };
+    }
+
+    function draw(e) {
+        if (!painting || !paintActive) return;
+        const rect = paintCanvas.getBoundingClientRect();
+        const scaleX = paintCanvas.width / rect.width;
+        const scaleY = paintCanvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+
+        paintCtx.lineWidth = brushSize;
+        paintCtx.lineCap = 'round';
+        paintCtx.lineJoin = 'round';
+
+        if (currentTool === 'brush') {
+            paintCtx.strokeStyle = brushColor;
+        } else if (currentTool === 'eraser') {
+            paintCtx.strokeStyle = 'white';
+        }
+
+        paintCtx.lineTo(x, y);
+        paintCtx.stroke();
+        paintCtx.beginPath();
+        paintCtx.moveTo(x, y);
+    }
+
+    document.getElementById('brushBtn').addEventListener('click', function() {
+        currentTool = 'brush';
+        this.style.background = '#4caf50';
+        this.style.color = 'white';
+        document.getElementById('eraserBtn').style.background = '';
+        document.getElementById('eraserBtn').style.color = '';
+    });
+    document.getElementById('eraserBtn').addEventListener('click', function() {
+        currentTool = 'eraser';
+        this.style.background = '#9e9e9e';
+        this.style.color = 'white';
+        document.getElementById('brushBtn').style.background = '';
+        document.getElementById('brushBtn').style.color = '';
+    });
+    document.getElementById('brushSize').addEventListener('input', function(e) {
+        brushSize = e.target.value;
+        document.getElementById('sizeDisplay').innerText = brushSize;
+    });
+    document.getElementById('colorPicker').addEventListener('input', function(e) {
+        brushColor = e.target.value;
+    });
+
+    function updateTimerDisplay() {
+        let minutes = Math.floor(timerSeconds / 60);
+        let seconds = timerSeconds % 60;
+        document.getElementById('paintTimer').innerText = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }
+
+    document.getElementById('savePaintBtn').addEventListener('click', function() {
+        if (!paintActive) { alert('Mulai challenge dulu!'); return; }
+        saveDrawingToGallery();
+    });
+
+    function saveDrawingToGallery() {
+        const dataURL = paintCanvas.toDataURL();
+        gallery.push({ theme: currentTheme, themeName: themeNames[currentTheme], image: dataURL, date: new Date().toLocaleString() });
+        localStorage.setItem('figoGallery', JSON.stringify(gallery));
+        displayGallery();
+        alert('Gambar tersimpan di galeri!');
+    }
+
+    function displayGallery() {
+        const container = document.getElementById('galleryContainer');
+        container.innerHTML = '';
+        if (gallery.length === 0) {
+            container.innerHTML = '<p style="color: #5f4b34;">Belum ada karya. Yuk gambar!</p>';
+            return;
+        }
+        gallery.slice().reverse().forEach((item) => {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            div.innerHTML = `<img src="${item.image}" style="width:120px; height:90px; object-fit:cover; border-radius:12px;">
+                             <p style="margin-top:5px;">${item.themeName || item.theme}</p>`;
+            container.appendChild(div);
+        });
+    }
+
+    document.getElementById('clearPaintBtn').addEventListener('click', function() {
+        paintCtx.fillStyle = 'white';
+        paintCtx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+    });
+
+    document.getElementById('clearGalleryBtn').addEventListener('click', function() {
+        gallery = [];
+        localStorage.removeItem('figoGallery');
+        displayGallery();
+    });
+</script>
+
+
+</body></html>
